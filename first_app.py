@@ -263,8 +263,8 @@ def test2():
     if st.button('Predict'):
         arr = [*[x[0] for x in heroes_team_1], *[x[0] for x in heroes_team_2]]
         l_df = pd.DataFrame(0, index=[0], columns=col)
-        for idx, hero_id in enumerate(arr):
-            val = 1 if idx < 5 else -1
+        for  hero_id in arr:
+            val = 1 if hero_id in [x[0] for x in heroes_team_1] else -1
             hero_str_id = str(hero_id)
             if len(hero_str_id) == 1:
                 to_add = 'id00'
@@ -273,17 +273,19 @@ def test2():
             else:
                 to_add = 'id'
             l_df.loc[0][to_add + hero_str_id] = val
+        l_df
+        pred_cat_heroes = model_heroes_catboost.predict_proba(l_df)
+        st.write('Radiant win prob(Catboost): ' + str(pred_cat_heroes[0][1]))
         X_p = l_df.values
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         X_p = torch.from_numpy(X_p).double()
-        X_p = X_p.to(device)
-        model = torch.load('model')
-        y_test_pred = model(X_p.float()).detach().cpu().numpy().flatten()
-        st.write('Radiant win prob: '+str(y_test_pred[0]))
+        model_nn = torch.load('model')
+        y_test_pred = model_nn(X_p.float()).detach().cpu().numpy().flatten()
+        st.write('Radiant win prob(PyTorch): '+str(y_test_pred[0]))
 
         st.success('Done!')
 st.title('Dota 2 Predictor')
 model = pickle.load(open('model.pickle', 'rb'))
+model_heroes_catboost = pickle.load(open('model_heroes_catboost.pickle', 'rb'))
 main_dict = pickle.load(open('main_dict.pickle', 'rb'))
 player_dict = main_dict['player_dict']
 team_dict = main_dict['team_dict']
