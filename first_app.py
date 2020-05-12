@@ -16,7 +16,7 @@ import trueskill
 import itertools
 import math
 from time import sleep
-# import torch
+import torch
 from collections import OrderedDict
 def win_probability(team1, team2):
     delta_mu = sum(r.mu for r in team1) - sum(r.mu for r in team2)
@@ -274,13 +274,12 @@ def test2():
                 to_add = 'id'
             l_df.loc[0][to_add + hero_str_id] = val
         X_p = l_df.values
-        st.write(X_p)
-        # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        # X_p = torch.from_numpy(X_p).double()
-        # X_p = X_p.to(device)
-        # model = torch.load('model')
-        # y_test_pred = model(X_p.float()).detach().cpu().numpy().flatten()
-        # st.write('Radiant win prob: '+str(y_test_pred[0]))
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        X_p = torch.from_numpy(X_p).double()
+        X_p = X_p.to(device)
+        model = torch.load('model')
+        y_test_pred = model(X_p.float()).detach().cpu().numpy().flatten()
+        st.write('Radiant win prob: '+str(y_test_pred[0]))
 
         st.success('Done!')
 st.title('Dota 2 Predictor')
