@@ -280,8 +280,7 @@ def test2():
         model = torch.load('model')
         y_test_pred = model(X_p.float()).detach().cpu().numpy().flatten()
         st.write('Radiant win prob: '+str(y_test_pred[0]))
-        git
-        add.
+
         st.success('Done!')
 st.title('Dota 2 Predictor')
 model = pickle.load(open('model.pickle', 'rb'))
