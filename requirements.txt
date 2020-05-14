@@ -84,3 +84,4 @@ watchdog==0.10.2
 wcwidth==0.1.9
 webencodings==0.5.1
 widgetsnbextension==3.5.1
+scikit-learn==0.23.0
