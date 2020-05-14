@@ -404,6 +404,7 @@ def make_row_heroes(id1, id2,hero_ids):
     dum_df = l_df
     res_df = pd.DataFrame()
     res_df_cat = pd.DataFrame()
+    model_catboost_dic = pickle.load(open('model_catboost_dic.pickle', 'rb'))
     df['cat_pred'] = model_catboost_dic.predict_proba(dum_df)[:, 1]
     X_p = l_df.values
     X_p = torch.from_numpy(X_p).double()
@@ -437,10 +438,11 @@ def make_row_heroes(id1, id2,hero_ids):
  'imp_player_hero_ratio']]
 heroes = [(1,'Anti-Mage'),(2,'Axe'),(3,'Bane'),(4,'Bloodseeker'),(5,'Crystal Maiden'),(6,'Drow Ranger'),(7,'Earthshaker'),(8,'Juggernaut'),(9,'Mirana'),(10,'Morphling'),(11,'Shadow Fiend'),(12,'Phantom Lancer'),(13,'Puck'),(14,'Pudge'),(15,'Razor'),(16,'Sand King'),(17,'Storm Spirit'),(18,'Sven'),(19,'Tiny'),(20,'Vengeful Spirit'),(21,'Windranger'),(22,'Zeus'),(23,'Kunkka'),(25,'Lina'),(26,'Lion'),(27,'Shadow Shaman'),(28,'Slardar'),(29,'Tidehunter'),(30,'Witch Doctor'),(31,'Lich'),(32,'Riki'),(33,'Enigma'),(34,'Tinker'),(35,'Sniper'),(36,'Necrophos'),(37,'Warlock'),(38,'Beastmaster'),(39,'Queen of Pain'),(40,'Venomancer'),(41,'Faceless Void'),(42,'Wraith King'),(43,'Death Prophet'),(44,'Phantom Assassin'),(45,'Pugna'),(46,'Templar Assassin'),(47,'Viper'),(48,'Luna'),(49,'Dragon Knight'),(50,'Dazzle'),(51,'Clockwerk'),(52,'Leshrac'),(53,"Nature's Prophet"),(54,'Lifestealer'),(55,'Dark Seer'),(56,'Clinkz'),(57,'Omniknight'),(58,'Enchantress'),(59,'Huskar'),(60,'Night Stalker'),(61,'Broodmother'),(62,'Bounty Hunter'),(63,'Weaver'),(64,'Jakiro'),(65,'Batrider'),(66,'Chen'),(67,'Spectre'),(68,'Ancient Apparition'),(69,'Doom'),(70,'Ursa'),(71,'Spirit Breaker'),(72,'Gyrocopter'),(73,'Alchemist'),(74,'Invoker'),(75,'Silencer'),(76,'Outworld Devourer'),(77,'Lycan'),(78,'Brewmaster'),(79,'Shadow Demon'),(80,'Lone Druid'),(81,'Chaos Knight'),(82,'Meepo'),(83,'Treant Protector'),(84,'Ogre Magi'),(85,'Undying'),(86,'Rubick'),(87,'Disruptor'),(88,'Nyx Assassin'),(89,'Naga Siren'),(90,'Keeper of the Light'),(91,'Io'),(92,'Visage'),(93,'Slark'),(94,'Medusa'),(95,'Troll Warlord'),(96,'Centaur Warrunner'),(97,'Magnus'),(98,'Timbersaw'),(99,'Bristleback'),(100,'Tusk'),(101,'Skywrath Mage'),(102,'Abaddon'),(103,'Elder Titan'),(104,'Legion Commander'),(105,'Techies'),(106,'Ember Spirit'),(107,'Earth Spirit'),(108,'Underlord'),(109,'Terrorblade'),(110,'Phoenix'),(111,'Oracle'),(112,'Winter Wyvern'),(113,'Arc Warden'),(114,'Monkey King'),(119,'Dark Willow'),(120,'Pangolier'),(121,'Grimstroke'),(126,'Void Spirit'),(128,'Snapfire'),(129,'Mars')]
 col  = ['id000','id001','id002','id003','id004','id005','id006','id007','id008','id009','id010','id011','id012','id013','id014','id015','id016','id017','id018','id019','id020','id021','id022','id023','id025','id026','id027','id028','id029','id030','id031','id032','id033','id034','id035','id036','id037','id038','id039','id040','id041','id042','id043','id044','id045','id046','id047','id048','id049','id050','id051','id052','id053','id054','id055','id056','id057','id058','id059','id060','id061','id062','id063','id064','id065','id066','id067','id068','id069','id070','id071','id072','id073','id074','id075','id076','id077','id078','id079','id080','id081','id082','id083','id084','id085','id086','id087','id088','id089','id090','id091','id092','id093','id094','id095','id096','id097','id098','id099','id100','id101','id102','id103','id104','id105','id106','id107','id108','id109','id110','id111','id112','id113','id114','id119','id120','id121','id126','id128','id129','idnone']
-dict_players_id= pickle.load(open('dict_players_id.pickle', 'rb'))
+
 @st.cache(suppress_st_warning=True)
 def get_players_info(players):
     res = []
+    dict_players_id = pickle.load(open('dict_players_id.pickle', 'rb'))
     for id in players:
         if id not in dict_players_id:
             url = 'https://api.opendota.com/api/players/{}'.format(id)
@@ -471,6 +473,7 @@ def test1():
         if st.button('Predict'):
             id1 = team1[1]
             id2 = team2[1]
+            model = pickle.load(open('model.pickle', 'rb'))
             x1 = make_row(int(id1), int(id2))
             result = model.predict_proba(x1)
 
@@ -525,6 +528,7 @@ def test1():
                 st.warning("Pick heroes 10 heroes pls")
             else:
                 x1 = make_row_heroes(int(id1), int(id2),[*r_heroes,*d_heroes])
+                last_model = pickle.load(open('last_model.pickle', 'rb'))
                 result = last_model.predict_proba(x1)
 
                 resp = {'Team_1': result[0][1],
@@ -555,6 +559,7 @@ def test2():
             else:
                 to_add = 'id'
             l_df.loc[0][to_add + hero_str_id] = val
+        model_heroes_catboost = pickle.load(open('model_heroes_catboost.pickle', 'rb'))
         pred_cat_heroes = model_heroes_catboost.predict_proba(l_df)
         st.write('Radiant win prob(Catboost): ' + str(pred_cat_heroes[0][1]))
         X_p = l_df.values
@@ -567,11 +572,8 @@ def test2():
 st.title('Dota 2 Predictor')
 env = trueskill.TrueSkill(draw_probability=0)
 env.make_as_global()
-model = pickle.load(open('model.pickle', 'rb'))
-model_heroes_catboost = pickle.load(open('model_heroes_catboost.pickle', 'rb'))
-model_catboost_dic = pickle.load(open('model_catboost_dic.pickle', 'rb'))
-last_model = pickle.load(open('last_model.pickle', 'rb'))
-model_dict = pickle.load(open('model_dict.pickle', 'rb'))
+
+
 main_dict = pickle.load(open('main_dict.pickle', 'rb'))
 player_dict = main_dict['player_dict']
 team_dict = main_dict['team_dict']
